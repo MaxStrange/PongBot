@@ -124,3 +124,10 @@ class BallState:
         :return: radius
         """
         return self.__radius
+
+    def set_radius(self, rad):
+        """
+        Sets the radius
+        :return: void
+        """
+        self.__radius = rad

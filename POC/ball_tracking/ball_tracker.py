@@ -104,21 +104,21 @@ class BallTracker:
         roi = image[slice_y, slice_x]
         roi = roi.copy()
 
-        cv2.imshow("a", roi)
-        cv2.waitKey(0)
+        # cv2.imshow("a", roi)
+        # cv2.waitKey(0)
 
         # Black out the rest of the image or erode it - tune depending on the surroundings
         image = cv2.erode(image, None, iterations=2)
         # cv2.rectangle(image, (0, 0), (IMAGE_WIDTH, image.shape[1]), (0, 0, 0), -1)
 
-        cv2.imshow("b", image)
-        cv2.waitKey(0)
+        # cv2.imshow("b", image)
+        # cv2.waitKey(0)
 
         # Put the ROI back in
         image[slice_y, slice_x] = roi
 
-        cv2.imshow("f", image)
-        cv2.waitKey(0)
+        # cv2.imshow("f", image)
+        # cv2.waitKey(0)
 
         return image
 
@@ -310,6 +310,18 @@ class BallTracker:
         :return: the next state
         """
         return self.__next_state
+
+    def set_current_state(self, state):
+        """
+        Updates the current state with the given value.
+        :param state: The ball state
+        :return: void
+        """
+        if self.__last_several_states:
+            self.__last_several_states[-1] = state
+        else:
+            self.__last_several_states = []
+            self.__last_several_states[-1] = state
 
     def set_frame(self, frame):
         """

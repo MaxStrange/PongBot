@@ -15,28 +15,28 @@ _DEL_T = 0.03333333
 # A is the matrix that occurs in real life due to the change from one
 # timestep to the next in the real state. It is the matrix that
 # Wikipedia calls F. It gets multiplied by the state vector.
-# _KALMAN_A = numpy.matrix([
-#                             [1, _DEL_T, 0, 0, 0, 0],
-#                             [0, 1,      0, 0, 0, 0],
-#                             [0, 0, 1, _DEL_T, 0, 0],
-#                             [0, 0, 0, 1,      0, 0],
-#                             [0, 0, 0, 0, 1, _DEL_T, 0],
-#                             [0, 0, 0, 0, 0, 1]
-#                           ])
-_KALMAN_A = numpy.matrix([1])
+_KALMAN_A = numpy.matrix([
+                            [1, _DEL_T, 0, 0, 0, 0],
+                            [0, 1,      0, 0, 0, 0],
+                            [0, 0, 1, _DEL_T, 0, 0],
+                            [0, 0, 0, 1,      0, 0],
+                            [0, 0, 0, 0, 1, _DEL_T],
+                            [0, 0, 0, 0, 0, 1]
+                          ])
+# _KALMAN_A = numpy.matrix([1])
 
 # B is the matrix which is responsible for mapping the control vector
 # into the same space as the state vector and then adding to it.
 # Wikipedia also calls this matrix B.
-# _KALMAN_B = numpy.matrix([
-#                             [0],
-#                             [0],
-#                             [0.5 * _DEL_T * _DEL_T],
-#                             [_DEL_T],
-#                             [0],
-#                             [0]
-#                           ])
-_KALMAN_B = numpy.matrix([0])
+_KALMAN_B = numpy.matrix([
+                            [0],
+                            [0],
+                            [0.5 * _DEL_T * _DEL_T],
+                            [_DEL_T],
+                            [0],
+                            [0]
+                          ])
+# _KALMAN_B = numpy.matrix([0])
 
 # The control vector is usually a vector. But in this case, we are using
 # a scalar, as it should work fine either way.
@@ -45,37 +45,37 @@ _CONTROL = 0
 
 # H is the matrix which moves the measured state into the same space as the
 # actual state. It should usually(?) just be an identity matrix.
-# _KALMAN_H = numpy.matrix([
-#                             [1, 0, 0, 0, 0, 0],
-#                             [0, 1, 0, 0, 0, 0],
-#                             [0, 0, 1, 0, 0, 0],
-#                             [0, 0, 0, 1, 0, 0],
-#                             [0, 0, 0, 0, 1, 0],
-#                             [0, 0, 0, 0, 0, 1]
-#                           ])
-_KALMAN_H = numpy.matrix([1])
+_KALMAN_H = numpy.matrix([
+                            [1, 0, 0, 0, 0, 0],
+                            [0, 1, 0, 0, 0, 0],
+                            [0, 0, 1, 0, 0, 0],
+                            [0, 0, 0, 1, 0, 0],
+                            [0, 0, 0, 0, 1, 0],
+                            [0, 0, 0, 0, 0, 1]
+                          ])
+# _KALMAN_H = numpy.matrix([1])
 
 # Q is the process error matrix. TODO: I don't know what this is.
-# _KALMAN_Q = numpy.matrix([
-#                             [0, 0, 0, 0, 0, 0],
-#                             [0, 0, 0, 0, 0, 0],
-#                             [0, 0, 0, 0, 0, 0],
-#                             [0, 0, 0, 0, 0, 0],
-#                             [0, 0, 0, 0, 0, 0],
-#                             [0, 0, 0, 0, 0, 0]
-#                           ])
-_KALMAN_Q = numpy.matrix([0])
+_KALMAN_Q = numpy.matrix([
+                            [0, 0, 0, 0, 0, 0],
+                            [0, 0, 0, 0, 0, 0],
+                            [0, 0, 0, 0, 0, 0],
+                            [0, 0, 0, 0, 0, 0],
+                            [0, 0, 0, 0, 0, 0],
+                            [0, 0, 0, 0, 0, 0]
+                          ])
+# _KALMAN_Q = numpy.matrix([0])
 
 # R is the measurement error covariance matrix. This has to be tweaked.
-# _KALMAN_R = numpy.matrix([
-#                             [0.2, 0, 0, 0, 0, 0],
-#                             [0, 0.2, 0, 0, 0, 0],
-#                             [0, 0, 0.2, 0, 0, 0],
-#                             [0, 0, 0, 0.2, 0, 0],
-#                             [0, 0, 0, 0, 0.2, 0],
-#                             [0, 0, 0, 0, 0, 0.2]
-#                           ])
-_KALMAN_R = numpy.matrix([0.2])
+_KALMAN_R = numpy.matrix([
+                            [0.00001, 0, 0, 0, 0, 0],
+                            [0, 0.00001, 0, 0, 0, 0],
+                            [0, 0, 0.1, 0, 0, 0],
+                            [0, 0, 0, 0.002, 0, 0],
+                            [0, 0, 0, 0, 0.002, 0],
+                            [0, 0, 0, 0, 0, 0.1]
+                          ])
+# _KALMAN_R = numpy.matrix([0.2])
 
 _filter = None
 
@@ -124,15 +124,15 @@ def initialize(state_vector):
     :return: void
     """
     # our initial guess at the covariance of the state is identity
-    # P = numpy.matrix([
-    #                     [1, 0, 0, 0, 0, 0],
-    #                     [0, 1, 0, 0, 0, 0],
-    #                     [0, 0, 1, 0, 0, 0],
-    #                     [0, 0, 0, 1, 0, 0],
-    #                     [0, 0, 0, 0, 1, 0],
-    #                     [0, 0, 0, 0, 0, 1]
-    #                   ])
-    P = numpy.matrix([1])
+    P = numpy.matrix([
+                        [1, 0, 0, 0, 0, 0],
+                        [0, 1, 0, 0, 0, 0],
+                        [0, 0, 1, 0, 0, 0],
+                        [0, 0, 0, 1, 0, 0],
+                        [0, 0, 0, 0, 1, 0],
+                        [0, 0, 0, 0, 0, 1]
+                      ])
+    # P = numpy.matrix([1])
     global _filter
     _filter = mykalman.MyKalmanFilter(_KALMAN_A, _KALMAN_B, _KALMAN_H, state_vector, P, _KALMAN_Q, _KALMAN_R)
     
@@ -153,4 +153,4 @@ def get_filtered_state():
     Gets the state after it has gone through the Kalman Filter.
     :return: A state vector that is the updated state
     """
-    return _filter.get_filtered_state()
+    return _filter.get_current_state()

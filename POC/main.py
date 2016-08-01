@@ -62,18 +62,20 @@ def run_loop(camera, log_file):
             print "Measured: " + measured_ball_state.to_str(as_int=True)
 
         # TODO: kalman filter
-        # if measured_ball_state:
-        #     # Filter the data using a Kalman Filter and update the ball_tracker with the newly found data
-        #     state_vector = kf.package_state_as_vector(measured_ball_state.get_x_pos(),
-        #                                               measured_ball_state.get_y_pos(),
-        #                                               measured_ball_state.get_d_pos(),
-        #                                               measured_ball_state.get_x_velocity(),
-        #                                               measured_ball_state.get_y_velocity(),
-        #                                               measured_ball_state.get_d_velocity())
-        #     kf.update(state_vector)
-        #     updated_vector = kf.get_filtered_state()
-        #     updated_ball_state = ball_state.BallState(kf.unpack_state(updated_vector))
-        #     measured_ball_state = updated_ball_state
+        if measured_ball_state:
+            # Filter the data using a Kalman Filter and update the ball_tracker with the newly found data
+            state_vector = kf.package_state_as_vector(measured_ball_state.get_x_pos(),
+                                                      measured_ball_state.get_y_pos(),
+                                                      measured_ball_state.get_d_pos(),
+                                                      measured_ball_state.get_x_velocity(),
+                                                      measured_ball_state.get_y_velocity(),
+                                                      measured_ball_state.get_d_velocity())
+            kf.update(state_vector)
+            updated_vector = kf.get_filtered_state()
+            updated_ball_state = ball_state.BallState(*kf.unpack_state(updated_vector))
+            updated_ball_state.set_radius(measured_ball_state.get_radius())
+            measured_ball_state = updated_ball_state
+            tracker.set_current_state(measured_ball_state)
 
         if measured_ball_state:
             # Record the data
