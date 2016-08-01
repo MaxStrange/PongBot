@@ -89,29 +89,36 @@ class BallTracker:
         :param image: The image to crop
         :return: The image after cropping
         """
-        # parameters - tune these
-        r1 = (int(image.shape[0] / 3), 0)
-        r2 = (int(image.shape[0] * 4.5 / 3), image.shape[1])
+        # parameters - tune these in the config file
+        # r1 = (x0, y0)
+        # r2 = (x1, y1)
+        # The slice is a rectangle spanned by these two points.
+
+        r1 = config.TOP_LEFT
+        r2 = config.BOTTOM_RIGHT
+
+        slice_y = slice(r1[1], r2[1])
+        slice_x = slice(r1[0], r2[0])
 
         # Get the region of interest
-        roi = image[r1[1]:r2[1], r1[0]:r2[0]]
+        roi = image[slice_y, slice_x]
         roi = roi.copy()
 
-        # cv2.imshow("a", roi)
-        # cv2.waitKey(0)
+        cv2.imshow("a", roi)
+        cv2.waitKey(0)
 
         # Black out the rest of the image or erode it - tune depending on the surroundings
         image = cv2.erode(image, None, iterations=2)
         # cv2.rectangle(image, (0, 0), (IMAGE_WIDTH, image.shape[1]), (0, 0, 0), -1)
 
-        # cv2.imshow("b", image)
-        # cv2.waitKey(0)
+        cv2.imshow("b", image)
+        cv2.waitKey(0)
 
         # Put the ROI back in
-        image[r1[1]:r2[1], r1[0]:r2[0]] = roi
+        image[slice_y, slice_x] = roi
 
-        # cv2.imshow("f", image)
-        # cv2.waitKey(0)
+        cv2.imshow("f", image)
+        cv2.waitKey(0)
 
         return image
 
@@ -145,45 +152,7 @@ class BallTracker:
 
         # If estimate of ball's position is good enough, take that region of the image out before eroding and
         # put it back in afterwards.
-        roi = None
-        if self.get_predicted_state():
-            likely_x, likely_y, likely_rad = int(self.get_predicted_state().get_x_pos()), \
-                                             int(self.get_predicted_state().get_y_pos()), \
-                                             int(self.get_predicted_state().get_radius())
-            x_range_left = likely_x - (likely_rad * 2)
-            y_range_up = likely_y - (likely_rad * 2)
-            x_range_right = likely_x + (likely_rad * 2)
-            y_range_down = likely_y + (likely_rad * 2)
-            y_slice = slice(y_range_up, y_range_down)
-            x_slice = slice(x_range_left, x_range_right)
-
-            try:
-                roi = in_ranged[y_slice, x_slice]
-                roi = roi.copy()
-
-                # blah = self.__frame[y_slice, x_slice]
-                # blah = blah.copy()
-                #
-                # bloop = self.__frame.copy()
-
-                # point_one = (likely_x - likely_rad * 2, likely_y - likely_rad * 2)
-                # point_two = (likely_x + likely_rad * 2, likely_y + likely_rad * 2)
-
-                # cv2.circle(bloop, point_one, 5, (0, 255, 0), 5)
-                # cv2.circle(bloop, point_two, 5, (255, 0, 0), 5)
-                # cv2.circle(bloop, (likely_x, likely_y), 5, (0, 0, 0), 5)
-                # color = (255, 0, 255)
-                # thickness = 5
-                # cv2.rectangle(bloop, point_one, point_two, color, thickness)
-
-                # cv2.imshow("c", blah)
-                # cv2.waitKey(0)
-                #
-                # cv2.imshow("d", bloop)
-                # cv2.waitKey(0)
-
-            except cv2.error as e:
-                roi = None
+        roi, x_slice, y_slice = self.__remove_predicted_ball_region(in_ranged)
 
         # Erode resultant white blobs a bit to destroy noise and to cut down on competing white blobs
         eroded = cv2.erode(in_ranged, None, iterations=2)
@@ -191,6 +160,7 @@ class BallTracker:
         # cv2.imshow("eroded", eroded)
         # cv2.waitKey(0)
 
+        # If we have the ball as a cropped out section, paste it back on top of the eroded image
         if roi is not None:
             eroded[y_slice, x_slice] = roi
 
@@ -272,6 +242,57 @@ class BallTracker:
         next_state = ball_state.BallState(predicted_x, predicted_y, predicted_d, measured_velocities[0],
                                           measured_velocities[1], measured_velocities[2], current_state.get_radius())
         return next_state
+
+    def __remove_predicted_ball_region(self, in_ranged):
+        """
+        If a prediction of the ball's data exists, use it to
+        crop the ball out and return that cropped out section.
+        :param in_ranged: The image so far in the pipeline
+        :return: The likely region containing the ball and the slices used to obtain it.
+        """
+        roi, x_slice, y_slice = None, None, None
+        if self.get_predicted_state():
+            likely_x, likely_y, likely_rad = int(self.get_predicted_state().get_x_pos()), \
+                                             int(self.get_predicted_state().get_y_pos()), \
+                                             int(self.get_predicted_state().get_radius())
+            x_range_left = likely_x - (likely_rad * 2)
+            y_range_up = likely_y - (likely_rad * 2)
+            x_range_right = likely_x + (likely_rad * 2)
+            y_range_down = likely_y + (likely_rad * 2)
+            y_slice = slice(y_range_up, y_range_down)
+            x_slice = slice(x_range_left, x_range_right)
+
+            try:
+                roi = in_ranged[y_slice, x_slice]
+                roi = roi.copy()
+
+                # For debugging this when necessary
+
+                # blah = self.__frame[y_slice, x_slice]
+                # blah = blah.copy()
+                #
+                # bloop = self.__frame.copy()
+
+                # point_one = (likely_x - likely_rad * 2, likely_y - likely_rad * 2)
+                # point_two = (likely_x + likely_rad * 2, likely_y + likely_rad * 2)
+
+                # cv2.circle(bloop, point_one, 5, (0, 255, 0), 5)
+                # cv2.circle(bloop, point_two, 5, (255, 0, 0), 5)
+                # cv2.circle(bloop, (likely_x, likely_y), 5, (0, 0, 0), 5)
+                # color = (255, 0, 255)
+                # thickness = 5
+                # cv2.rectangle(bloop, point_one, point_two, color, thickness)
+
+                # cv2.imshow("c", blah)
+                # cv2.waitKey(0)
+                #
+                # cv2.imshow("d", bloop)
+                # cv2.waitKey(0)
+
+            except cv2.error as e:
+                roi = None
+
+        return roi, x_slice, y_slice
 
     def get_last_state(self):
         """

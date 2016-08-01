@@ -44,12 +44,12 @@ while True:
     frame = imutils.resize(frame, width=900)
 
     # Convert the image to HSV
-    hsv = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)  # TODO: look up this API call
+    hsv = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
 
     # cv2.imshow("Frame", hsv)
     # cv2.waitKey(0)
 
-    # Image processing pipeline # TODO: look up these API calls
+    # Image processing pipeline
     mask = cv2.inRange(hsv, hsv_lower_range, hsv_upper_range)
 
     # cv2.imshow("Frame", mask)
@@ -69,7 +69,7 @@ while True:
     # cv2.imshow("Frame", mask)
     # cv2.waitKey(0)
 
-    # Find all the contours in the resultant image # TODO : look up this API call
+    # Find all the contours in the resultant image
     cnts = cv2.findContours(mask.copy(), cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)[-2]
     center = None
 
@@ -81,7 +81,7 @@ while True:
         # Get the ball's min enclosing circle
         ((x, y), radius) = cv2.minEnclosingCircle(ball_contour)
 
-        # Get the moments of the ball_contour TODO : look up this API call
+        # Get the moments of the ball_contour
         M = cv2.moments(ball_contour)
 
         # Get the center of the ball as a tuple of x, y. This is also the x, y in our coordinate system

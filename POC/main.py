@@ -1,5 +1,5 @@
 """
-This module contains a script for finding a ping pong ball and tracking its x, y, and z location.
+This module contains a script for finding a ping pong ball and tracking its x, y location and distance from camera.
 """
 
 import cv2
@@ -8,6 +8,7 @@ from data_recorder import data_recorder
 from ui import frame_drawer
 import imutils
 import config
+import kalman.control as kf
 
 
 def cleanup(camera, log_file):
@@ -33,6 +34,7 @@ def run_loop(camera, log_file):
     drawer = frame_drawer.FrameDrawer(None)
     tracker = ball_tracker.BallTracker(None)
     recorder = data_recorder.DataRecorder(log_file)
+    kf.initialize(kf.package_state_as_vector(0, 0, 0, 0, 0, 0))
 
     # Run the loop
     while True:
@@ -41,7 +43,7 @@ def run_loop(camera, log_file):
         if not grabbed:
             break
         else:
-            frame = imutils.resize(frame, width=config.IMAGE_WIDTH)
+            frame = imutils.resize(frame, width=config.IMAGE_WIDTH, height=config.IMAGE_HEIGHT)
             drawer.set_frame(frame)
             tracker.set_frame(frame)
 
@@ -58,6 +60,20 @@ def run_loop(camera, log_file):
         if predicted_state and measured_ball_state:
             print "Predicted: " + predicted_state.to_str(as_int=True)
             print "Measured: " + measured_ball_state.to_str(as_int=True)
+
+        # TODO: kalman filter
+        # if measured_ball_state:
+        #     # Filter the data using a Kalman Filter and update the ball_tracker with the newly found data
+        #     state_vector = kf.package_state_as_vector(measured_ball_state.get_x_pos(),
+        #                                               measured_ball_state.get_y_pos(),
+        #                                               measured_ball_state.get_d_pos(),
+        #                                               measured_ball_state.get_x_velocity(),
+        #                                               measured_ball_state.get_y_velocity(),
+        #                                               measured_ball_state.get_d_velocity())
+        #     kf.update(state_vector)
+        #     updated_vector = kf.get_filtered_state()
+        #     updated_ball_state = ball_state.BallState(kf.unpack_state(updated_vector))
+        #     measured_ball_state = updated_ball_state
 
         if measured_ball_state:
             # Record the data

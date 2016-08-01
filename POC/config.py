@@ -23,7 +23,15 @@ BALL_RADIUS = 0.75
 
 # The pixel width of the image after you resize it - then it gets processed at that size
 IMAGE_WIDTH = 900
+IMAGE_HEIGHT = 900
 
 # The actual hsv values that the ball_tracker will use
 hsv_lower_range = ORANGE_HSV_LOWER
 hsv_upper_range = ORANGE_HSV_UPPER
+
+# Top left point for the rectangle that will be the portion of the image we process
+TOP_LEFT = (int(IMAGE_WIDTH / 3), 0)
+
+# Bottom right point for the rectangle that will be the portion of the image we process
+BOTTOM_RIGHT = (int(IMAGE_WIDTH * 4.5 / 3), IMAGE_HEIGHT)
+
