@@ -22,6 +22,8 @@ ORANGE_HSV_UPPER = (42, 255, 255)#(36, 255, 255)
 FOCAL_DISTANCE = 1861.83
 BALL_RADIUS = 0.75
 
+IMAGE_WIDTH = 900
+
 hsv_lower_range = ORANGE_HSV_LOWER
 hsv_upper_range = ORANGE_HSV_UPPER
 
@@ -100,6 +102,38 @@ class BallTracker:
         constrain = lambda i: ((0.6 * measured_velocities[i]) + (0.4 * avgs[i]))
         return constrain(0), constrain(1), constrain(2)
 
+    def __crop(self, image):
+        """
+        Crops the image and returns a new one.
+        :param image: The image to crop
+        :return: The image after cropping
+        """
+        # parameters - tune these
+        r1 = (int(image.shape[0] / 3), 0)
+        r2 = (int(image.shape[0] * 4.5 / 3), image.shape[1])
+
+        # Get the region of interest
+        roi = image[r1[1]:r2[1], r1[0]:r2[0]]
+        roi = roi.copy()
+
+        # cv2.imshow("a", roi)
+        # cv2.waitKey(0)
+
+        # Black out the rest of the image or erode it - tune depending on the surroundings
+        image = cv2.erode(image, None, iterations=2)
+        # cv2.rectangle(image, (0, 0), (IMAGE_WIDTH, image.shape[1]), (0, 0, 0), -1)
+
+        # cv2.imshow("b", image)
+        # cv2.waitKey(0)
+
+        # Put the ROI back in
+        image[r1[1]:r2[1], r1[0]:r2[0]] = roi
+
+        # cv2.imshow("f", image)
+        # cv2.waitKey(0)
+
+        return image
+
     def __enqueue_state(self, ball_state):
         """
         Enqueue the state into the list of last several states to help track the ball in the future.
@@ -121,22 +155,53 @@ class BallTracker:
 
         # Convert everything non-orange into black and everything orange into white
         in_ranged = cv2.inRange(hsv, hsv_lower_range, hsv_upper_range)
-        # cv2.imshow("inranged", in_ranged)
-        # cv2.waitKey(0)
+        cv2.imshow("inranged", in_ranged)
+        cv2.waitKey(0)
+
+        # Remove the background
+        in_ranged = self.__crop(in_ranged)
 
         # If estimate of ball's position is good enough, take that region of the image out before eroding and
         # put it back in afterwards.
         roi = None
         if self.get_predicted_state():
-            likely_x, likely_y, likely_rad = self.get_predicted_state().get_x_pos(), \
-                                             self.get_predicted_state().get_y_pos(), \
-                                             self.get_predicted_state().get_d_pos()
-            x_range_left = likely_x - (likely_rad * 5)
-            x_range_right = likely_x + (likely_rad * 5)
-            y_range_up = likely_y - (likely_rad * 5)
-            y_range_down = likely_y + (likely_rad * 5)
-            # TODO: Get this working
-            roi = in_ranged[y_range_up:y_range_down, x_range_left:x_range_right]
+            likely_x, likely_y, likely_rad = int(self.get_predicted_state().get_x_pos()), \
+                                             int(self.get_predicted_state().get_y_pos()), \
+                                             int(self.get_predicted_state().get_radius())
+            x_range_left = likely_x - (likely_rad * 2)
+            y_range_up = likely_y - (likely_rad * 2)
+            x_range_right = likely_x + (likely_rad * 2)
+            y_range_down = likely_y + (likely_rad * 2)
+            y_slice = slice(y_range_up, y_range_down)
+            x_slice = slice(x_range_left, x_range_right)
+
+            try:
+                roi = in_ranged[y_slice, x_slice]
+                roi = roi.copy()
+
+                # blah = self.__frame[y_slice, x_slice]
+                # blah = blah.copy()
+                #
+                # bloop = self.__frame.copy()
+
+                # point_one = (likely_x - likely_rad * 2, likely_y - likely_rad * 2)
+                # point_two = (likely_x + likely_rad * 2, likely_y + likely_rad * 2)
+
+                # cv2.circle(bloop, point_one, 5, (0, 255, 0), 5)
+                # cv2.circle(bloop, point_two, 5, (255, 0, 0), 5)
+                # cv2.circle(bloop, (likely_x, likely_y), 5, (0, 0, 0), 5)
+                # color = (255, 0, 255)
+                # thickness = 5
+                # cv2.rectangle(bloop, point_one, point_two, color, thickness)
+
+                # cv2.imshow("c", blah)
+                # cv2.waitKey(0)
+                #
+                # cv2.imshow("d", bloop)
+                # cv2.waitKey(0)
+
+            except cv2.error as e:
+                roi = None
 
         # Erode resultant white blobs a bit to destroy noise and to cut down on competing white blobs
         eroded = cv2.erode(in_ranged, None, iterations=2)
@@ -145,13 +210,16 @@ class BallTracker:
         # cv2.waitKey(0)
 
         if roi is not None:
-            eroded[y_range_up:y_range_down, x_range_left:x_range_right] = roi
+            eroded[y_slice, x_slice] = roi
+
+        # cv2.imshow("eroded2", eroded)
+        # cv2.waitKey(0)
 
         # Dilate the eroded stuff back to normal - but the noise will still be gone
         dilated = cv2.dilate(eroded, None, iterations=2)
 
-        # cv2.imshow("dilated", dilated)
-        # cv2.waitKey(0)
+        cv2.imshow("dilated", dilated)
+        cv2.waitKey(0)
 
         return dilated
 

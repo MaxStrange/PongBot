@@ -27,6 +27,13 @@ class BallState:
         self.__d_vel = d_vel
         self.__radius = radius
 
+    def __str__(self):
+        """
+        As Str
+        :return: The str representation of this object
+        """
+        return self.to_str()
+
     def to_str(self, as_int=False):
         """
         Returns a string version of the state

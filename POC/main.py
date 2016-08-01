@@ -44,7 +44,7 @@ def run_loop(camera, log_file):
         if not grabbed:
             break
         else:
-            frame = imutils.resize(frame, width=900)
+            frame = imutils.resize(frame, width=ball_tracker.IMAGE_WIDTH)
             drawer.set_frame(frame)
             tracker.set_frame(frame)
 
@@ -52,6 +52,7 @@ def run_loop(camera, log_file):
 
         # Find the ball and get its location and info from the image
         measured_ball_state = tracker.find_ball()
+        updated_prediction = tracker.get_predicted_state()
 
         # Draw a frame but don't show it yet
         drawer.paint_prediction_box(predicted_state)

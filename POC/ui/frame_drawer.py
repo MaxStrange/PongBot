@@ -50,11 +50,13 @@ class FrameDrawer:
         """
         if not predicted_state:
             return
+        likely_x = int(predicted_state.get_x_pos())
+        likely_y = int(predicted_state.get_y_pos())
+        likely_rad = int(predicted_state.get_radius())
 
-        point_one = (int(predicted_state.get_x_pos() - (predicted_state.get_radius() * 2)),
-                     (int(predicted_state.get_y_pos() - (predicted_state.get_radius() * 2))))
-        point_two = (int((predicted_state.get_x_pos() + (predicted_state.get_radius() * 2))),
-                     (int(predicted_state.get_y_pos() + (predicted_state.get_radius() * 2))))
+        point_one = (likely_x - likely_rad * 2, likely_y - likely_rad * 2)
+        point_two = (likely_x + likely_rad * 2, likely_y + likely_rad * 2)
+
         cv2.circle(self.__frame, point_one, 5, (0, 255, 0), 5)
         cv2.circle(self.__frame, point_two, 5, (255, 0, 0), 5)
         cv2.circle(self.__frame, (int(predicted_state.get_x_pos()), int(predicted_state.get_y_pos())), 5, (0, 0, 0), 5)
