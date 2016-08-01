@@ -11,17 +11,11 @@ import cv2
 # Run this script and see what the focal length is. Also make sure that its output matches the measured data.
 # Once you have the focal length, you can use that for the main.py script
 
-#RGB values:
-#(0, 165, 206)
-#(148, 255, 255)
-def find_marker_radius(image):
-    # White
-    #orangeLower = (51, 0, 149)
-    #orangeUpper = (105, 57, 255)
 
-    # Orange
+def find_marker_radius(image):
     orangeLower = (25, 0, 239)
     orangeUpper = (36, 255, 255)
+
     print "Showing image in a frame, push a key to move on"
     frame = cv2.imshow("Frame", image)
 
@@ -80,7 +74,8 @@ KNOWN_DISTANCE = 24  # 12, 48 are the inches to blah 1 and blah 2
 KNOWN_RADIUS = 0.75
 
 IMAGE_PATH = "C:\\Users\Max\\Pictures\\Camera Roll\\blah0.jpg"
-TEST_IMAGE_PATHS = ["C:\\Users\\Max\\Pictures\\Camera Roll\\blah1.jpg", "C:\\Users\\Max\\Pictures\\Camera Roll\\blah3.jpg"]
+TEST_IMAGE_PATHS = ["C:\\Users\\Max\\Pictures\\Camera Roll\\blah1.jpg",
+                    "C:\\Users\\Max\\Pictures\\Camera Roll\\blah3.jpg"]
 
 # load the first image that contains an object that is KNOWN TO BE 2 feet
 # from our camera, then find the marker in the image, and initialize

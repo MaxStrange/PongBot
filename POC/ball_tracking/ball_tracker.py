@@ -4,34 +4,14 @@ A module to hold a class for tracking a ping pong ball.
 
 import cv2
 import ball_state
-import imutils
-
-
-# Mishi:
-MISH_HSV_LOWER = (0, 132, 82)
-MISH_HSV_UPPER = (20, 255, 182)
-
-# White ball:
-WHITE_HSV_LOWER = (51, 0, 149)
-WHITE_HSV_UPPER = (105, 57, 255)
-
-# Orange ball:
-ORANGE_HSV_LOWER = (18, 69, 231)#(25, 0, 239)
-ORANGE_HSV_UPPER = (42, 255, 255)#(36, 255, 255)
-
-FOCAL_DISTANCE = 1861.83
-BALL_RADIUS = 0.75
-
-IMAGE_WIDTH = 900
-
-hsv_lower_range = ORANGE_HSV_LOWER
-hsv_upper_range = ORANGE_HSV_UPPER
+import POC.config as config
 
 
 class BallTracker:
     """
     A class for tracking a ping pong ball.
     """
+
     def __init__(self, frame):
         """
         Constructor.
@@ -83,7 +63,8 @@ class BallTracker:
         :return:
         """
         if self.get_last_state():
-            print "Last X: " + str(self.get_last_state().get_x_pos()) + " Y: " + str(self.get_last_state().get_y_velocity())
+            print "Last X: " + str(self.get_last_state().get_x_pos()) + " Y: " + str(
+                self.get_last_state().get_y_velocity())
             print "This X: " + str(current_state.get_x_pos()) + " Y: " + str(current_state.get_y_pos())
             vx = current_state.get_x_pos() - self.get_last_state().get_x_pos()
             vy = current_state.get_y_pos() - self.get_last_state().get_y_pos()
@@ -154,9 +135,10 @@ class BallTracker:
         hsv = cv2.cvtColor(self.__frame, cv2.COLOR_BGR2HSV)
 
         # Convert everything non-orange into black and everything orange into white
-        in_ranged = cv2.inRange(hsv, hsv_lower_range, hsv_upper_range)
-        cv2.imshow("inranged", in_ranged)
-        cv2.waitKey(0)
+        in_ranged = cv2.inRange(hsv, config.hsv_lower_range, config.hsv_upper_range)
+
+        # cv2.imshow("inranged", in_ranged)
+        # cv2.waitKey(0)
 
         # Remove the background
         in_ranged = self.__crop(in_ranged)
@@ -218,8 +200,8 @@ class BallTracker:
         # Dilate the eroded stuff back to normal - but the noise will still be gone
         dilated = cv2.dilate(eroded, None, iterations=2)
 
-        cv2.imshow("dilated", dilated)
-        cv2.waitKey(0)
+        # cv2.imshow("dilated", dilated)
+        # cv2.waitKey(0)
 
         return dilated
 
@@ -254,7 +236,7 @@ class BallTracker:
                 min_radius = (0.5 * last_radius) if (last_radius < 30) else (0.25 * last_radius)
                 radius = last_radius if radius < min_radius else radius
 
-            distance_from_camera = float(BALL_RADIUS * FOCAL_DISTANCE) / float(radius)
+            distance_from_camera = float(config.BALL_RADIUS * config.FOCAL_DISTANCE) / float(radius)
 
             return ball_state.BallState(x, y, distance_from_camera, radius=radius)
         else:

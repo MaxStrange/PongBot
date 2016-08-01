@@ -7,10 +7,7 @@ from ball_tracking import ball_tracker, ball_state
 from data_recorder import data_recorder
 from ui import frame_drawer
 import imutils
-
-
-USE_LIVE_VIDEO = False
-PATH_TO_VIDEO = "pong2.mp4"
+import config
 
 
 def cleanup(camera, log_file):
@@ -44,7 +41,7 @@ def run_loop(camera, log_file):
         if not grabbed:
             break
         else:
-            frame = imutils.resize(frame, width=ball_tracker.IMAGE_WIDTH)
+            frame = imutils.resize(frame, width=config.IMAGE_WIDTH)
             drawer.set_frame(frame)
             tracker.set_frame(frame)
 
@@ -69,7 +66,7 @@ def run_loop(camera, log_file):
                                  tracker.get_predicted_state().get_y_pos(), tracker.get_predicted_state().get_d_pos())
 
         # Wait for the user to push the q key to quit the program or any button to move to next frame
-        if USE_LIVE_VIDEO:
+        if config.USE_LIVE_VIDEO:
             key = cv2.waitKey(1) & 0xFF
             if key == ord("q"):
                     break
@@ -81,11 +78,11 @@ def setup():
     Initializes the camera and the datalog file and returns them.
     :return: A tuple: Opened camera, opened file.
     """
-    if USE_LIVE_VIDEO:
+    if config.USE_LIVE_VIDEO:
         camera = cv2.VideoCapture(0)
     else:
         camera = cv2.VideoCapture()
-        camera.open(PATH_TO_VIDEO)
+        camera.open(config.PATH_TO_VIDEO)
 
     log_file = open('datalogFORPONG2.csv', 'w')
     return camera, log_file
