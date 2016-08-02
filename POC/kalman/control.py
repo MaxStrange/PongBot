@@ -55,25 +55,25 @@ _KALMAN_H = numpy.matrix([
                           ])
 # _KALMAN_H = numpy.matrix([1])
 
-# Q is the process error matrix. TODO: I don't know what this is.
+# Q is the process error matrix.
 _KALMAN_Q = numpy.matrix([
-                            [0, 0, 0, 0, 0, 0],
-                            [0, 0, 0, 0, 0, 0],
-                            [0, 0, 0, 0, 0, 0],
-                            [0, 0, 0, 0, 0, 0],
-                            [0, 0, 0, 0, 0, 0],
-                            [0, 0, 0, 0, 0, 0]
+                            [0.1, 0, 0, 0, 0, 0],
+                            [0, 0.1, 0, 0, 0, 0],
+                            [0, 0, 0.1, 0, 0, 0],
+                            [0, 0, 0, 0.01, 0, 0],
+                            [0, 0, 0, 0, 0.01, 0],
+                            [0, 0, 0, 0, 0, 0.01]
                           ])
 # _KALMAN_Q = numpy.matrix([0])
 
 # R is the measurement error covariance matrix. This has to be tweaked.
 _KALMAN_R = numpy.matrix([
-                            [0.00001, 0, 0, 0, 0, 0],
-                            [0, 0.00001, 0, 0, 0, 0],
-                            [0, 0, 0.1, 0, 0, 0],
-                            [0, 0, 0, 0.002, 0, 0],
-                            [0, 0, 0, 0, 0.002, 0],
-                            [0, 0, 0, 0, 0, 0.1]
+                            [0.05, 0, 0, 0, 0, 0],
+                            [0, 0.001, 0, 0, 0, 0],
+                            [0, 0, 0.01, 0, 0, 0],
+                            [0, 0, 0, 0.001, 0, 0],
+                            [0, 0, 0, 0, 0.001, 0],
+                            [0, 0, 0, 0, 0, 0.001]
                           ])
 # _KALMAN_R = numpy.matrix([0.2])
 
