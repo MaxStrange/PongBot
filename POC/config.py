@@ -35,3 +35,6 @@ TOP_LEFT = (int(IMAGE_WIDTH / 3), 0)
 # Bottom right point for the rectangle that will be the portion of the image we process
 BOTTOM_RIGHT = (int(IMAGE_WIDTH * 4.5 / 3), IMAGE_HEIGHT)
 
+# TCP stuff
+TCP_IP = '127.0.0.1'
+TCP_PORT = 5005

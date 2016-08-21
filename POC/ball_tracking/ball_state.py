@@ -52,6 +52,19 @@ class BallState:
         state_str += str_func("rad", self.get_radius())
         return state_str
 
+    def format_for_sending(self):
+        """
+        Returns a string for sending over TCP port.
+        :return: str for sending
+        """
+        x = self.get_x_pos()
+        y = self.get_y_pos()
+        d = self.get_d_pos()
+        vx = self.get_x_velocity()
+        vy = self.get_y_velocity()
+        vd = self.get_d_velocity()
+        return "%1.4f%1.4f%1.4f%1.4f%1.4f%1.4f" % (x, y, d, vx, vy, vd)
+
     def get_x_pos(self):
         """
         Gets the x pos

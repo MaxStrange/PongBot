@@ -9,25 +9,30 @@ from ui import frame_drawer
 import imutils
 import config
 import kalman.control as kf
+import socket
 
 
-def cleanup(camera, log_file):
+def cleanup(camera, log_file, soc):
     """
     Cleans up the resources used by the program.
     :param camera: The open camera reference to close.
     :param log_file: The log file to close.
+    :param soc: TCP socket
     :return: void
     """
     camera.release()
     log_file.close()
+    if soc:
+        soc.close()
 
 
-def run_loop(camera, log_file):
+def run_loop(camera, log_file, soc):
     """
     Runs the main application logic. Runs through the video (or webcam grab). Finds the ball, measures its current
     distance, and predicts what the next location of the ball will be. Logs the data.
     :param camera: An open reference to a video or webcam.
     :param log_file: The file to log data in.
+    :param soc: TCP socket
     :return: void
     """
     # Initialize classes to use throughout loop
@@ -84,6 +89,9 @@ def run_loop(camera, log_file):
             recorder.record_data(measured_ball_state.get_x_pos(), measured_ball_state.get_y_pos(),
                                  measured_ball_state.get_d_pos(), tracker.get_predicted_state().get_x_pos(),
                                  tracker.get_predicted_state().get_y_pos(), tracker.get_predicted_state().get_d_pos())
+            formatted_state = measured_ball_state.format_for_sending()
+            if soc:
+                soc.send(formatted_state)
 
         # Wait for the user to push the q key to quit the program or any button to move to next frame
         if config.USE_LIVE_VIDEO:
@@ -105,10 +113,20 @@ def setup():
         camera.open(config.PATH_TO_VIDEO)
 
     log_file = open('datalogFORPONG2.csv', 'w')
-    return camera, log_file
+
+    soc = None
+    try:
+        soc = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        soc.connect((config.TCP_IP, config.TCP_PORT))
+    except socket.error as e:
+        print str(e)
+        print "Socket will be unnavailable."
+        soc = None
+
+    return camera, log_file, soc
 
 
 if __name__ == '__main__':
-    camera, log_file = setup()
-    run_loop(camera, log_file)
-    cleanup(camera, log_file)
+    camera, log_file, soc = setup()
+    run_loop(camera, log_file, soc)
+    cleanup(camera, log_file, soc)
